@@ -1,5 +1,5 @@
 # !/usr/bin/python
-# -*- coding: utf-8 -*-
+# -*- coding: utf8 -*-
 
 # 任意选一个你喜欢的整数，这能帮你得到稳定的结果
 seed = 1
@@ -78,7 +78,10 @@ def gj_Solve(A,b,decPts=4, epsilon = 1.0e-16):
     columnCount = len(M[0]) - 1
 
     # 1. 如果行与列数量不等,返回None
-    if rowCount != columnCount:
+    if len(A) != len(A[0]):
+        return None
+    
+    if len(A) != len(b):
         return None
 
     # 3. RREF
@@ -104,6 +107,15 @@ def gj_Solve(A,b,decPts=4, epsilon = 1.0e-16):
         for k in range(c):
             while abs(M[k][c]) >= epsilon:
                 addScaledRow(M, k, c, M[k][c])
+        for i in range(c + 1, rowCount):
+            while abs(M[i][c]) >= epsilon:
+                addScaledRow(M, i, c, -M[i][c])
+
+    # 返回最后一列      
+    result = []
+    for r in range(rowCount):
+        result.append([M[r][-1]])
+    return result
 
 # 3 线性回归
 
