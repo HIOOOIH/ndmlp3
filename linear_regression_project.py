@@ -68,12 +68,9 @@ def addScaledRow(M, r1, r2, scale):
 # 2.3.3 实现 Gaussian Jordan 消元法
 
 # https://www.codelast.com/原创全选主元的高斯-约当（gauss-jordan）消元法解线性方/
-# https://www.codelast.com/原创全选主元的高斯-约当（gauss-jordan）消元法解线性方/
 def gj_Solve(A,b,decPts=4, epsilon = 1.0e-16):
     # 2. 构造增广矩阵
     M = augmentMatrix(A, b)
-
-    maxIndex = 0
 
     rowCount = len(M)
     columnCount = len(M[0]) - 1
@@ -81,12 +78,16 @@ def gj_Solve(A,b,decPts=4, epsilon = 1.0e-16):
     # 1. 如果行与列数量不等,返回None
     if len(A) != len(A[0]):
         return None
-    
+
     if len(A) != len(b):
         return None
 
     # 3. RREF
     for c in range(columnCount):
+
+        # 精度问题导致scaleRow判断是否为0不正确
+        maxIndex = 0.0
+
         # 3.1 最大值所在行初始为当前行
         maxRow = c
 
@@ -98,25 +99,29 @@ def gj_Solve(A,b,decPts=4, epsilon = 1.0e-16):
 
         # 3.3 最大值若为零返回（奇异矩阵）
         if abs(maxIndex) < epsilon:
-            return None      
+            return None
         else:
             swapRows(M, c, maxRow)
-            # 3.5 行内都除以绝对值最大值,使最大值变为1
-            if (M[c][c]) >= 1:
-                scaleRow(M, c, 1 / M[c][c])
 
-            # 3.4 将绝对值最大值所在行交换到对角线元素所在行（行c） (M, c, maxRow)
+            # 3.5 行内都除以绝对值最大值,使最大值变为1
+            while abs((M[c][c] - 1.0)) >= epsilon:
+                scaleRow(M, c, 1.0 / M[c][c])
+
+            # 3.4 将绝对值最大值所在行交换到对角线元素所在行（行c）
             for k in range(c):
                 while abs(M[k][c]) >= epsilon:
-                    addScaledRow(M, k, c, M[k][c])
+                    addScaledRow(M, k, c, -M[k][c])
             for i in range(c + 1, rowCount):
                 while abs(M[i][c]) >= epsilon:
                     addScaledRow(M, i, c, -M[i][c])
     
-    # 返回最后一列            
+    # 返回结果并四舍五入结果     
     result = []
     for r in range(rowCount):
         result.append([M[r][-1]])
+
+    matxRound(result)
+    
     return result
 
 
